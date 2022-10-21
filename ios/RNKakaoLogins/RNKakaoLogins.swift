@@ -14,12 +14,6 @@ import KakaoSDKUser
 
 @objc(RNKakaoLogins)
 class RNKakaoLogins: NSObject {
-
-    public override init() {
-        let appKey: String? = Bundle.main.object(forInfoDictionaryKey: "KAKAO_APP_KEY") as? String
-        KakaoSDK.initSDK(appKey: appKey!)
-    }
-
     @objc
     static func requiresMainQueueSetup() -> Bool {
       return true
@@ -150,45 +144,6 @@ class RNKakaoLogins: NSObject {
                     resolve([
                         "accessToken": TokenManager.manager.getToken()?.accessToken,
                         "expiresIn": accessTokenInfo?.expiresIn,
-                    ])
-                }
-            }
-        }
-    }
-
-    @objc(getProfile:rejecter:)
-    func getProfile(_ resolve: @escaping RCTPromiseResolveBlock,
-               rejecter reject: @escaping RCTPromiseRejectBlock) -> Void {
-        DispatchQueue.main.async {
-            UserApi.shared.me() {(user, error) in
-                if let error = error {
-                    reject("RNKakaoLogins", error.localizedDescription, nil)
-                }
-                else {
-                    resolve([
-                        "id": user?.id as Any,
-                        "name": user?.kakaoAccount?.name as Any,
-                        "email": user?.kakaoAccount?.email as Any,
-                        "nickname": user?.kakaoAccount?.profile?.nickname as Any,
-                        "profileImageUrl": user?.kakaoAccount?.profile?.profileImageUrl?.absoluteString as Any,
-                        "thumbnailImageUrl": user?.kakaoAccount?.profile?.thumbnailImageUrl?.absoluteString as Any,
-                        "phoneNumber": user?.kakaoAccount?.phoneNumber as Any,
-                        "ageRange": user?.kakaoAccount?.ageRange?.rawValue as Any,
-                        "birthday": user?.kakaoAccount?.birthday as Any,
-                        "birthdayType": user?.kakaoAccount?.birthdayType as Any,
-                        "birthyear": user?.kakaoAccount?.birthyear as Any,
-                        "gender": user?.kakaoAccount?.gender?.rawValue as Any,
-                        "isEmailValid": user?.kakaoAccount?.isEmailValid as Any,
-                        "isEmailVerified": user?.kakaoAccount?.isEmailVerified as Any,
-                        "isKorean": user?.kakaoAccount?.isKorean as Any,
-                        "ageRangeNeedsAgreement": user?.kakaoAccount?.ageRangeNeedsAgreement as Any,
-                        "birthdayNeedsAgreement": user?.kakaoAccount?.birthdayNeedsAgreement as Any,
-                        "birthyearNeedsAgreement": user?.kakaoAccount?.birthyearNeedsAgreement as Any,
-                        "emailNeedsAgreement": user?.kakaoAccount?.emailNeedsAgreement as Any,
-                        "genderNeedsAgreement": user?.kakaoAccount?.genderNeedsAgreement as Any,
-                        "isKoreanNeedsAgreement": user?.kakaoAccount?.isKoreanNeedsAgreement as Any,
-                        "phoneNumberNeedsAgreement": user?.kakaoAccount?.phoneNumberNeedsAgreement as Any,
-                        "profileNeedsAgreement": user?.kakaoAccount?.profileNeedsAgreement as Any,
                     ])
                 }
             }

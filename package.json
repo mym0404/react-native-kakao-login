@@ -1,6 +1,6 @@
 {
-  "name": "@react-native-seoul/kakao-login",
-  "version": "5.2.3",
+  "name": "@mj-studio/kakao-login",
+  "version": "6.0.0",
   "description": "React Native Module for Kakao Login",
   "main": "src/index.js",
   "types": "src/index.d.ts",
@@ -10,7 +10,7 @@
     "build": "tsc && tsc -P ./plugins && flowgen src/index.d.ts -o src/index.js.flow",
     "flow": "flow",
     "lint": "eslint -c .eslintrc.js 'src'",
-    "validate": "npm run lint && npm run test:typescript && npm run test:flow && npm run test"
+    "prepublish": "yarn lint && yarn tsc && yarn build"
   },
   "repository": {
     "type": "git",

@@ -1,19 +1,18 @@
 package com.dooboolab.kakaologins
 
-import com.facebook.react.bridge.*
-import com.kakao.sdk.common.KakaoSdk.init
+import com.facebook.react.bridge.Arguments
+import com.facebook.react.bridge.Promise
+import com.facebook.react.bridge.ReactApplicationContext
+import com.facebook.react.bridge.ReactContextBaseJavaModule
+import com.facebook.react.bridge.ReactMethod
+import com.kakao.sdk.auth.TokenManagerProvider
 import com.kakao.sdk.common.model.AuthError
 import com.kakao.sdk.user.UserApiClient
-import com.kakao.sdk.user.model.User
-import com.kakao.sdk.auth.TokenManagerProvider
 import java.text.SimpleDateFormat
 import java.util.*
 
 class RNKakaoLoginsModule(private val reactContext: ReactApplicationContext) : ReactContextBaseJavaModule(reactContext) {
-    private fun dateFormat(date: Date?): String {
-        val sdf = SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
-        return sdf.format(date)
-    }
+    private fun dateFormat(date: Date?)= SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(date)
 
     override fun getName(): String {
         return "RNKakaoLogins"
@@ -22,7 +21,7 @@ class RNKakaoLoginsModule(private val reactContext: ReactApplicationContext) : R
     @ReactMethod
     private fun login(promise: Promise) {
         if (UserApiClient.instance.isKakaoTalkLoginAvailable(reactContext)) {
-            reactContext.currentActivity?.let {
+            currentActivity?.let {
                 UserApiClient.instance.loginWithKakaoTalk(it) { token, error: Throwable? ->
                     if (error != null) {
                         if (error is AuthError && error.statusCode == 302) {
@@ -37,10 +36,6 @@ class RNKakaoLoginsModule(private val reactContext: ReactApplicationContext) : R
                         val (accessToken, accessTokenExpiresAt, refreshToken, refreshTokenExpiresAt, idToken, scopes) = token
                         val map = Arguments.createMap()
                         map.putString("accessToken", accessToken)
-                        map.putString("refreshToken", refreshToken)
-                        map.putString("idToken", idToken)
-                        map.putString("accessTokenExpiresAt", dateFormat(accessTokenExpiresAt))
-                        map.putString("refreshTokenExpiresAt", dateFormat(refreshTokenExpiresAt))
                         val scopeArray = Arguments.createArray()
                         if (scopes != null) {
                             for (scope in scopes) {
@@ -167,62 +162,7 @@ class RNKakaoLoginsModule(private val reactContext: ReactApplicationContext) : R
          }
     }
 
-    private fun convertValue(`val`: Boolean?): Boolean {
-        return `val` ?: false
-    }
-
-    @ReactMethod
-    private fun getProfile(promise: Promise) {
-        UserApiClient.instance.me { user: User?, error: Throwable? ->
-            if (error != null) {
-                promise.reject("RNKakaoLogins", error.message, error)
-                return@me
-            }
-
-            if (user != null) {
-                val map = Arguments.createMap()
-                map.putString("id", user.id.toString())
-                val kakaoUser = user.kakaoAccount
-                if (kakaoUser != null) {
-                    map.putString("name", kakaoUser.name.toString())
-                    map.putString("email", kakaoUser!!.email.toString())
-                    map.putString("nickname", kakaoUser.profile?.nickname)
-                    map.putString("profileImageUrl", kakaoUser.profile?.profileImageUrl)
-                    map.putString("thumbnailImageUrl", kakaoUser.profile?.thumbnailImageUrl)
-
-                    map.putString("phoneNumber", kakaoUser.phoneNumber.toString())
-                    map.putString("ageRange", kakaoUser!!.ageRange.toString())
-                    map.putString("birthday", kakaoUser.birthday.toString())
-                    map.putString("birthdayType", kakaoUser.birthdayType.toString())
-                    map.putString("birthyear", kakaoUser.birthyear.toString())
-                    map.putString("gender", kakaoUser.gender.toString())
-                    map.putBoolean("isEmailValid", convertValue(kakaoUser.isEmailValid))
-                    map.putBoolean("isEmailVerified", convertValue(kakaoUser.isEmailVerified))
-                    map.putBoolean("isKorean", convertValue(kakaoUser.isKorean))
-                    map.putBoolean("ageRangeNeedsAgreement", convertValue(kakaoUser.ageRangeNeedsAgreement))
-                    map.putBoolean("birthdayNeedsAgreement", convertValue(kakaoUser.birthdayNeedsAgreement))
-                    map.putBoolean("birthyearNeedsAgreement", convertValue(kakaoUser.birthyearNeedsAgreement))
-                    map.putBoolean("emailNeedsAgreement", convertValue(kakaoUser.emailNeedsAgreement))
-                    map.putBoolean("genderNeedsAgreement", convertValue(kakaoUser.genderNeedsAgreement))
-                    map.putBoolean("isKoreanNeedsAgreement", convertValue(kakaoUser.isKoreanNeedsAgreement))
-                    map.putBoolean("phoneNumberNeedsAgreement", convertValue(kakaoUser.phoneNumberNeedsAgreement))
-                    map.putBoolean("profileNeedsAgreement", convertValue(kakaoUser.profileNeedsAgreement))
-                }
-                promise.resolve(map)
-                return@me
-            }
-
-            promise.reject("RNKakaoLogins", "User is null")
-        }
-    }
-
     companion object {
         private const val TAG = "RNKakaoLoginModule"
-    }
-
-    init {
-        val kakaoAppKey = reactContext.resources.getString(
-                reactContext.resources.getIdentifier("kakao_app_key", "string", reactContext.packageName))
-        init(reactContext, kakaoAppKey)
     }
 }
