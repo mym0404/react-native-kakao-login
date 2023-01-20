@@ -200,3 +200,7 @@ export const getAccessToken = async (): Promise<KakaoAccessTokenInfo> => {
     throw err;
   }
 };
+
+export const getAllowedServiceTermTags = async (): Promise<string[]> => {
+  return await RNKakaoLogins.getAllowedServiceTermTags();
+};
