@@ -149,4 +149,23 @@ class RNKakaoLogins: NSObject {
             }
         }
     }
+	
+	@objc(getAllowedServiceTermTags:rejecter:)
+	func getAllowedServiceTermsTags(_ resolve: @escaping RCTPromiseResolveBlock,
+									rejecter reject: @escaping RCTPromiseRejectBlock) -> Void {
+		DispatchQueue.main.async {
+			let encoder = JSONEncoder()
+			UserApi.shared.serviceTerms {(serviceTerms, error) in
+				if let error = error {
+					reject("RNKakaoLogins", error.localizedDescription, nil)
+				} else {
+					var tags: [String] = []
+					serviceTerms?.allowedServiceTerms?.forEach { terms in
+						tags.append(terms.tag)
+					}
+					resolve(tags)
+				}
+			}
+		}
+	}
 }

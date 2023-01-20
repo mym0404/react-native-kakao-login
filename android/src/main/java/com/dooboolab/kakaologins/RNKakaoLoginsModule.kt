@@ -1,5 +1,6 @@
 package com.dooboolab.kakaologins
 
+import android.util.Log
 import com.facebook.react.bridge.Arguments
 import com.facebook.react.bridge.Promise
 import com.facebook.react.bridge.ReactApplicationContext
@@ -8,6 +9,8 @@ import com.facebook.react.bridge.ReactMethod
 import com.kakao.sdk.auth.TokenManagerProvider
 import com.kakao.sdk.common.model.AuthError
 import com.kakao.sdk.user.UserApiClient
+import com.kakao.sdk.user.model.ServiceTerms
+import org.json.JSONObject
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -94,24 +97,22 @@ class RNKakaoLoginsModule(private val reactContext: ReactApplicationContext) : R
                 return@loginWithKakaoAccount
             }
 
-            if (token != null) {
-                val (accessToken, accessTokenExpiresAt, refreshToken, refreshTokenExpiresAt, idToken, scopes) = token
-                val map = Arguments.createMap()
-                map.putString("accessToken", accessToken)
-                map.putString("refreshToken", refreshToken)
-                map.putString("idToken", idToken)
-                map.putString("accessTokenExpiresAt", dateFormat(accessTokenExpiresAt))
-                map.putString("refreshTokenExpiresAt", dateFormat(refreshTokenExpiresAt))
-                val scopeArray = Arguments.createArray()
-                if (scopes != null) {
-                    for (scope in scopes) {
-                        scopeArray.pushString(scope)
-                    }
+            val (accessToken, accessTokenExpiresAt, refreshToken, refreshTokenExpiresAt, idToken, scopes) = token
+            val map = Arguments.createMap()
+            map.putString("accessToken", accessToken)
+            map.putString("refreshToken", refreshToken)
+            map.putString("idToken", idToken)
+            map.putString("accessTokenExpiresAt", dateFormat(accessTokenExpiresAt))
+            map.putString("refreshTokenExpiresAt", dateFormat(refreshTokenExpiresAt))
+            val scopeArray = Arguments.createArray()
+            if (scopes != null) {
+                for (scope in scopes) {
+                    scopeArray.pushString(scope)
                 }
-                map.putArray("scopes", scopeArray)
-                promise.resolve(map)
-                return@loginWithKakaoAccount
             }
+            map.putArray("scopes", scopeArray)
+            promise.resolve(map)
+            return@loginWithKakaoAccount
         }
     }
 
@@ -123,7 +124,6 @@ class RNKakaoLoginsModule(private val reactContext: ReactApplicationContext) : R
                 return@logout
             }
             promise.resolve("Successfully logged out")
-            null
         }
     }
 
@@ -135,7 +135,6 @@ class RNKakaoLoginsModule(private val reactContext: ReactApplicationContext) : R
                 return@unlink
             }
             promise.resolve("Successfully unlinked")
-            null
         }
     }
 
@@ -160,6 +159,25 @@ class RNKakaoLoginsModule(private val reactContext: ReactApplicationContext) : R
 
             promise.reject("RNKakaoLogins", "Token is null")
          }
+    }
+
+    @ReactMethod
+    private fun getAllowedServiceTermTags(promise: Promise) {
+        UserApiClient.instance.serviceTerms { userServiceTerms, error ->
+            if (error != null) {
+                promise.reject("RNKakaoLogins", error.message, error)
+                return@serviceTerms
+            }
+            else if (userServiceTerms != null) {
+                val tags = mutableListOf<String>()
+                userServiceTerms.allowedServiceTerms?.forEach {
+                    tags.add(it.tag)
+                }
+                promise.resolve(tags)
+                return@serviceTerms
+            }
+            promise.reject("RNKakaoLogins", "serviceTerms is null")
+        }
     }
 
     companion object {

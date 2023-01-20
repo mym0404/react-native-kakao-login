@@ -47,7 +47,7 @@ repositories {
 
 dependencies {
   //noinspection GradleDynamicVersion
-  implementation "com.facebook.react:react-native:+"
+  implementation("com.facebook.react:react-android:+")
   implementation "org.jetbrains.kotlin:kotlin-stdlib:${getExtOrDefault('kotlinVersion')}"
 
   // Kakao
@@ -57,10 +57,10 @@ dependencies {
   implementation "com.kakao.sdk:v2-story:$kakaoVersion" // 카카오 스토리
 }
 
-rootProject.allprojects {
-  repositories {
-    maven {
-      url 'https://devrepo.kakao.com/nexus/content/groups/public/'
-    }
+repositories {
+  maven {
+    url 'https://devrepo.kakao.com/nexus/content/groups/public/'
   }
+  mavenCentral()
+  google()
 }
