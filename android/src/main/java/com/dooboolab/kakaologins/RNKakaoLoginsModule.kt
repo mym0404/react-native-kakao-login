@@ -6,6 +6,7 @@ import com.facebook.react.bridge.Promise
 import com.facebook.react.bridge.ReactApplicationContext
 import com.facebook.react.bridge.ReactContextBaseJavaModule
 import com.facebook.react.bridge.ReactMethod
+import com.facebook.react.bridge.WritableArray
 import com.kakao.sdk.auth.TokenManagerProvider
 import com.kakao.sdk.common.model.AuthError
 import com.kakao.sdk.user.UserApiClient
@@ -169,9 +170,9 @@ class RNKakaoLoginsModule(private val reactContext: ReactApplicationContext) : R
                 return@serviceTerms
             }
             else if (userServiceTerms != null) {
-                val tags = mutableListOf<String>()
+                val tags = Arguments.createArray()
                 userServiceTerms.allowedServiceTerms?.forEach {
-                    tags.add(it.tag)
+                    tags.pushString(it.tag)
                 }
                 promise.resolve(tags)
                 return@serviceTerms
